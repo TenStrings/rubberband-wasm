@@ -1,5 +1,3 @@
 dist/
 node_modules/
-rubberband-wasm.js
-rubberband-wasm.wasm
 public/vendor/
