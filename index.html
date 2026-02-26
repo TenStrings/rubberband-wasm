@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rubber Band Pitch Demo</title>
+    <style>
+      :root {
+        --bg: #f7f5ef;
+        --card: #fffdf8;
+        --ink: #1a1a1a;
+        --accent: #0e7a59;
+        --muted: #5f5f5f;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, #fffefb, var(--bg));
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        width: min(680px, 100%);
+        background: var(--card);
+        border: 1px solid #e7e2d5;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(1.2rem, 2vw, 1.6rem);
+      }
+      p {
+        margin: 8px 0;
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .file-row input[type="file"] {
+        font-size: 1rem;
+      }
+      .file-row input[type="file"]::file-selector-button {
+        padding: 11px 16px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--accent);
+        color: white;
+      }
+      button.secondary {
+        background: #d8d2c3;
+        color: #222;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      label {
+        display: block;
+        margin-top: 14px;
+        font-weight: 600;
+      }
+      input[type="range"] {
+        width: 100%;
+        margin-top: 8px;
+      }
+      .pitch-controls {
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .pitch-step {
+        min-width: 42px;
+        padding: 8px 10px;
+        font-size: 1.1rem;
+        line-height: 1;
+      }
+      .pitch-value {
+        min-width: 64px;
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #d7d2c7;
+        border-radius: 10px;
+        background: #fff;
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .process-btn {
+        margin-left: 6px;
+      }
+      .start-btn {
+        padding: 12px 22px;
+        font-size: 1rem;
+      }
+      .download-row {
+        margin-top: 12px;
+      }
+      .download-btn {
+        padding: 12px 22px;
+        font-size: 1rem;
+      }
+      .divider {
+        border: 0;
+        border-top: 1px solid #e7e2d5;
+        margin: 14px 0;
+      }
+      #status {
+        margin-top: 14px;
+        padding: 10px;
+        border-radius: 10px;
+        background: #f1ede2;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.9rem;
+      }
+      .warn {
+        font-size: 0.9rem;
+      }
+      .legal {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px solid #e7e2d5;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+      .legal a {
+        color: var(--accent);
+      }
+      audio {
+        width: 100%;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Rubber Band Pitch Shift</h1>
+
+      <div class="row file-row">
+        <input id="fileInput" type="file" accept="audio/*" />
+      </div>
+
+      <hr class="divider" />
+      <label for="pitchValue">Semitones</label>
+      <div class="pitch-controls">
+        <button id="pitchDownBtn" class="secondary pitch-step" type="button" aria-label="Decrease pitch">-</button>
+        <div id="pitchValue" class="pitch-value">0</div>
+        <button id="pitchUpBtn" class="secondary pitch-step" type="button" aria-label="Increase pitch">+</button>
+        <button id="processBtn" class="process-btn start-btn" disabled>Start</button>
+      </div>
+      <div id="status">idle</div>
+
+      <hr class="divider" />
+      <label for="originalPlayer">Original</label>
+      <audio id="originalPlayer" controls></audio>
+
+      <label for="processedPlayer">Processed</label>
+      <audio id="processedPlayer" controls></audio>
+      <hr class="divider" />
+      <div class="row download-row">
+        <button id="downloadBtn" class="download-btn" disabled>Download</button>
+        <button id="downloadOpusBtn" class="download-btn" disabled>Download Opus</button>
+      </div>
+
+      <section class="legal">
+        <div>
+          This tool uses
+          <a href="https://breakfastquay.com/rubberband/" target="_blank" rel="noopener noreferrer">Rubber Band Library</a>.
+        </div>
+        <div>
+          It also uses
+          <a href="https://github.com/ffmpegwasm/ffmpeg.wasm" target="_blank" rel="noopener noreferrer">ffmpeg.wasm core</a>
+          (`@ffmpeg/core`).
+        </div>
+        <div>
+          Source code for this deployed build:
+          <a href="https://github.com/TenStrings/rubberband-wasm" target="_blank" rel="noopener noreferrer">https://github.com/TenStrings/rubberband-wasm</a>
+        </div>
+        <div>
+          License: GNU GPL v2 or later.
+          <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank" rel="noopener noreferrer">View GPL text</a>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
